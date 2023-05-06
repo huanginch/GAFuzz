@@ -1,0 +1,4 @@
+cosname	teaname	wk	dept_no	degree	cl1	cl2	cl3	cl4	cl5	cl6	cl7	cl8	cl9	cl10	cl11	cl12	cl13	cl14	cl15	cl16
+數	徐珊惠	7	M1	3	1	1	0	0	0	1	0	0	1	0	0	0	0	0	1	1
+教學	黃暉升	1	S3	5	0	0	1	1	1	0	1	1	0	1	1	1	1	1	0	0
+管理	路克史密斯	4	R6	7	1	0	1	0	0	0	1	0	1	1	1	0	0	1	0	1
