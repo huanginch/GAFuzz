@@ -11,7 +11,7 @@ genetic.select1 = Genetic.Select1.Tournament2;
 genetic.select2 = Genetic.Select2.Tournament2;
 
 genetic.seed = function () {
-  let n = Math.floor(Math.random() * this.userData.length);
+  // let n = Math.floor(Math.random() * this.userData.length);
   console.log(this.userData);
   return this.userData;
 }
