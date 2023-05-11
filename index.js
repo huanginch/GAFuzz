@@ -2,6 +2,7 @@ const fuzzReq = require('./src/fuzzReq');
 const fs = require('fs');
 const readline = require('readline');
 const Genetic = require('genetic-js');
+const axios = require('axios');
 
 // genetic algorithm setting
 console.log("Start genetic algorithm...");
@@ -11,28 +12,43 @@ genetic.select1 = Genetic.Select1.Tournament2;
 genetic.select2 = Genetic.Select2.Tournament2;
 
 genetic.seed = function () {
-  // let n = Math.floor(Math.random() * this.userData.length);
-  console.log(this.userData);
-  return this.userData;
+  let n = Math.floor(Math.random() * Object.keys(this.userData).length);
+  return this.userData[n];
 }
-// genetic.mutate = function (entity) {
-// };
-// genetic.crossover = function (mother, father) {
-//   // two-point crossover
-//   var len = mother.length;
-//   var ca = Math.floor(Math.random() * len);
-//   var cb = Math.floor(Math.random() * len);
-//   if (ca > cb) {
-//     var tmp = cb;
-//     cb = ca;
-//     ca = tmp;
-//   }
 
-//   var son = father.substr(0, ca) + mother.substr(ca, cb - ca) + father.substr(cb);
-//   var daughter = mother.substr(0, ca) + father.substr(ca, cb - ca) + mother.substr(cb);
+genetic.mutate = function (entity) {
+  entity[2] = Math.floor(Math.random() * 7) + 1; //wk, generate 1 ~ 7
+  entity[4] = Math.floor(Math.random() * 7) + 1; // degree, generate 1 ~ 7
+  for(let i = 0; i < 16; i++) {
+    entity[5 + i] = Math.floor(Math.random() * 2); //cl, generate 0 or 1
+  }
+  return entity;
+};
 
-//   return [son, daughter];
-// };
+genetic.crossover = function (mother, father) {
+  // two-point crossover
+  var len = Object.keys(mother).length;
+  var ca = Math.floor(Math.random() * len);
+  var cb = Math.floor(Math.random() * len);
+  if (ca > cb) {
+    var tmp = cb;
+    cb = ca;
+    ca = tmp;
+  }
+
+  let son = JSON.parse(JSON.stringify(father));;
+  let daughter = JSON.parse(JSON.stringify(mother));;
+
+  for (let i = ca; i < ca - cb; i++) {
+    let temp = son[i];
+    son[i] = daughter[i];
+    daughter[i] = temp;
+  }
+  return [son, daughter];
+};
+
+genetic.fuzzReq = fuzzReq;
+
 genetic.fitness = async function (entity) {
   // console.log(entity);
   const url = "https://140.116.165.105/~cos/ccdemo/sel/index.php?c=qry11215&m=save_qry";
@@ -53,22 +69,17 @@ genetic.fitness = async function (entity) {
     "cl": cl,
   };
   // console.log(data);
-  const time = await fuzzReq(url, data);
-  console.log(`Execution time: ${time} ms`);
+  const time = await this.fuzzReq(url, data);
+  // console.log(`Execution time: ${time} ms`);
   return time;
 };
-
-// genetic.generation = function (pop, generation, stats) {
-//   // stop running once we've reached the solution
-
-// }
 
 let config = {
   "iterations": 1,
   "size": 250,
-  "crossover": 0.3,
-  "mutation": 0.3,
-  "skip": 20
+  "crossover": 0.9,
+  "mutation": 0.2,
+  "skip": 0
 };
 let file = './seed.txt';
 let userData = getData(file);
