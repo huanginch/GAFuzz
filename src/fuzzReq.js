@@ -9,14 +9,14 @@ async function fuzzReq(url, data) {
       // already defined the same object (meta)
       x.meta = x.meta || {};
       x.meta.requestStartedAt = new Date().getTime();
-      console.log(x.meta.requestStartedAt)
+      // console.log(x.meta.requestStartedAt);
       return x;
     })
 
     axios.interceptors.response.use(x => {
       resTime = new Date().getTime() - x.config.meta.requestStartedAt;
-      console.log(new Date().getTime())
-      console.log('----');
+      // console.log(new Date().getTime())
+      // console.log('----');
       // console.log(resTime)
       return x;
     },
@@ -32,8 +32,8 @@ async function fuzzReq(url, data) {
     return resTime;
   }
   catch (err) {
-    console.log(err);
-    return;
+    // console.log("error occur", err);
+    return 30000;
   }
 }
 

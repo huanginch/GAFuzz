@@ -15,6 +15,7 @@
   "author": "int",
   "license": "ISC",
   "dependencies": {
+    "async-genetic": "^1.6.8",
     "axios": "^1.4.0",
     "chai": "^4.3.7",
     "fs": "0.0.1-security",

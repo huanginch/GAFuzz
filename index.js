@@ -1,23 +1,72 @@
 const fuzzReq = require('./src/fuzzReq');
 const fs = require('fs');
-const readline = require('readline');
-const Genetic = require('genetic-js');
-const axios = require('axios');
+const { Genetic, Select } = require('async-genetic');
+
+// setting
+const config = {
+  mutationFunction: mutation,
+  crossoverFunction: crossover,
+  fitnessFunction: fitness,
+  fittestNSurvives: 1, // number of fittest survive
+  populationSize: 5, // constant size of population
+  select1: Select.FittestLinear,
+  select2: Select.Tournament3,
+  mutateProbablity: 0.2, // perturb prob random phenotype DNA
+  crossoverProbablity: 0.9, // crossover prob
+}
+
+let file = './seed_small.txt';
+let seed = getData(file);
+seed.shift(); // remove header row
+const population = seed;
+
+const genetic = new Genetic(config);
+// genetic.fuzzReq = fuzzReq;
+let generation = 10;
 
 // genetic algorithm setting
 console.log("Start genetic algorithm...");
-let genetic = Genetic.create();
-genetic.optimize = Genetic.Optimize.Maximize;
-genetic.select1 = Genetic.Select1.Tournament2;
-genetic.select2 = Genetic.Select2.Tournament2;
 
-genetic.seed = function () {
-  let n = Math.floor(Math.random() * Object.keys(this.userData).length);
-  return this.userData[n];
+async function solve () {
+  await genetic.seed(population);
+
+  for (let i = 0; i < generation; i++) {
+    await genetic.estimate();
+    // await genetic.breed();
+    console.log(`Generation ${i + 1} completed`);
+    const best = await genetic.best(20);
+    console.log(best);
+  }
+
+  fs.writeFile('./result.txt', JSON.stringify(population), "utf-8", (err) => {
+    if (err) throw err;
+  });
+  
 }
 
-genetic.mutate = function (entity) {
+solve();
+
+
+// functions
+async function mutation (entity) {
+  const dept_no = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A9", "AF", "AG", "AA", "AH", "AN", 
+                  "C0", "W1", "M1", "M2", "M3", "M4", "M5", "MZ", "J0", "M0", "NM", "NN", "NP", 
+                  "B0", "B1", "B2", "B3", "B4", "B5", "K1", "K2", "K3", "K4", "K5", "K7", "K8",
+                  "KZ", "C1", "C2", "C3", "C4", "CZ", "F8", "L1", "L2", "L3", "L4", "L7", "LA",
+                  "LZ", "VF", "VP", "E0", "E1", "E2", "E3", "E4", "E5", "E6", "E8", "E9", "F0", 
+                  "F1", "F4", "F5", "F6", "F9", "N0", "N1", "N2", "N3", "N4", "N5", "N6", "N8",
+                  "N9", "NA", "NB", "NC", "NF", "P0", "P1", "P4", "P5", "P6", "P8", "P4", "Q4",
+                  "VQ", "H1", "H2", "H3", "H4", "H5", "HZ", "R0", "R1", "R2", "R3", "R4", "R5",
+                  "R6", "R7", "R8", "R9", "RA", "RB", "RD", "RE", "RF", "RZ", "VR", "VT", "VY",
+                  "I2", "I3", "I5", "I6", "I7", "I8", "I9", "S0", "S1", "S2", "S3", "S4", "S5",
+                  "S6", "S7", "S8", "S9", "SA", "SB", "SC", "T1", "T2", "T3", "T4", "T6", "T7",
+                  "T8", "T9", "TA", "TC", "D0", "D2", "D4", "D5", "D8", "U1", "U2", "U3", "U5",
+                  "U7", "U8", "E2", "F7", "N2", "ND", "NE", "NQ", "P7", "P9", "Q1", "Q3", "Q5",
+                  "Q6", "Q7", "V6", "V8", "V9", "VA", "VB", "VC", "VD", "VE", "VG", "VH", "VK",
+                  "VM", "VN", "VO", "VS", "VU", "VV", "VW", "VX", "E7", "F2", "F3", "FZ", "N7",
+                  "P2", "P3", "PA", "PB", "PZ", "C5", "C6", "L5", "L6", "Z0", "Z2", "Z3", "Z5"];
   entity[2] = Math.floor(Math.random() * 7) + 1; //wk, generate 1 ~ 7
+  entity[3] = dept_no[Math.floor(Math.random() * dept_no.length)]; //dept_no, random select one
   entity[4] = Math.floor(Math.random() * 7) + 1; // degree, generate 1 ~ 7
   for(let i = 0; i < 16; i++) {
     entity[5 + i] = Math.floor(Math.random() * 2); //cl, generate 0 or 1
@@ -25,7 +74,7 @@ genetic.mutate = function (entity) {
   return entity;
 };
 
-genetic.crossover = function (mother, father) {
+async function crossover (mother, father) {
   // two-point crossover
   var len = Object.keys(mother).length;
   var ca = Math.floor(Math.random() * len);
@@ -47,9 +96,7 @@ genetic.crossover = function (mother, father) {
   return [son, daughter];
 };
 
-genetic.fuzzReq = fuzzReq;
-
-genetic.fitness = async function (entity) {
+async function fitness (entity) {
   // console.log(entity);
   const url = "https://140.116.165.105/~cos/ccdemo/sel/index.php?c=qry11215&m=save_qry";
   let cl = [];
@@ -69,22 +116,10 @@ genetic.fitness = async function (entity) {
     "cl": cl,
   };
   // console.log(data);
-  const time = await this.fuzzReq(url, data);
-  // console.log(`Execution time: ${time} ms`);
-  return time;
+  const time = await fuzzReq(url, data);
+  let fitness = time;
+  return { fitness };
 };
-
-let config = {
-  "iterations": 1,
-  "size": 250,
-  "crossover": 0.9,
-  "mutation": 0.2,
-  "skip": 0
-};
-let file = './seed.txt';
-let userData = getData(file);
-userData.shift(); // remove header row
-genetic.evolve(config, userData);
 
 function getData(file) {
   let data = [];
