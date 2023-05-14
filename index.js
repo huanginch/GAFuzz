@@ -1,6 +1,7 @@
 const fuzzReq = require('./src/fuzzReq');
 const fs = require('fs');
 const { Genetic, Select } = require('async-genetic');
+const { plot } = require('nodeplotlib');
 
 // setting
 const config = {
@@ -8,40 +9,54 @@ const config = {
   crossoverFunction: crossover,
   fitnessFunction: fitness,
   fittestNSurvives: 1, // number of fittest survive
-  populationSize: 5, // constant size of population
-  select1: Select.FittestLinear,
+  select1: Select.Tournament3,
   select2: Select.Tournament3,
   mutateProbablity: 0.2, // perturb prob random phenotype DNA
   crossoverProbablity: 0.9, // crossover prob
 }
 
-let file = './seed_small.txt';
+let file = './seed.txt';
 let seed = getData(file);
 seed.shift(); // remove header row
-const population = seed;
 
 const genetic = new Genetic(config);
-// genetic.fuzzReq = fuzzReq;
-let generation = 10;
+let GENERATION = 10;
 
 // genetic algorithm setting
 console.log("Start genetic algorithm...");
 
 async function solve () {
-  await genetic.seed(population);
+  await genetic.seed(seed);
+  const maxResponseTimes = [];
 
-  for (let i = 0; i < generation; i++) {
+  for (let i = 0; i < GENERATION; i++) {
     await genetic.estimate();
-    // await genetic.breed();
     console.log(`Generation ${i + 1} completed`);
-    const best = await genetic.best(20);
-    console.log(best);
+    const best = await genetic.best()[0];
+    console.log("best: ", best);
+    maxResponseTimes.push(best.fitness);
+    // console.log(population);
+    if (i === GENERATION - 1) {
+      console.log("Best result: ", best);
+    } else {
+      await genetic.breed();
+    }
+
   }
 
-  fs.writeFile('./result.txt', JSON.stringify(population), "utf-8", (err) => {
+  // write result to file
+  fs.writeFile('./result.txt', JSON.stringify(genetic.population), "utf-8", (err) => {
     if (err) throw err;
   });
   
+  // plot max response time
+  const data = [{
+    x: Array.from(Array(GENERATION).keys()),
+    y: maxResponseTimes,
+    type: 'scatter'
+  }]
+  
+  plot(data);
 }
 
 solve();
@@ -71,6 +86,7 @@ async function mutation (entity) {
   for(let i = 0; i < 16; i++) {
     entity[5 + i] = Math.floor(Math.random() * 2); //cl, generate 0 or 1
   }
+  
   return entity;
 };
 
@@ -115,10 +131,9 @@ async function fitness (entity) {
     "degree": entity[4],
     "cl": cl,
   };
-  // console.log(data);
   const time = await fuzzReq(url, data);
   let fitness = time;
-  return { fitness };
+  return { fitness, state: {} };
 };
 
 function getData(file) {

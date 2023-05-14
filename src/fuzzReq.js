@@ -33,7 +33,7 @@ async function fuzzReq(url, data) {
   }
   catch (err) {
     // console.log("error occur", err);
-    return 30000;
+    return 0;
   }
 }
 
