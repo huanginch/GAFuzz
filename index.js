@@ -1,23 +1,25 @@
 const fuzzReq = require('./src/fuzzReq');
 const fs = require('fs');
 const { Genetic, Select } = require('async-genetic');
-const { plot } = require('nodeplotlib');
+const { plot, Layout } = require('nodeplotlib');
+const { error } = require('console');
+
 
 // setting
+let file = './seed.txt';
+let seed = getData(file);
+seed.shift(); // remove header row
+
 const config = {
   mutationFunction: mutation,
   crossoverFunction: crossover,
   fitnessFunction: fitness,
-  fittestNSurvives: 1, // number of fittest survive
+  fittestNSurvives: 100, // number of fittest survive
   select1: Select.Tournament3,
   select2: Select.Tournament3,
   mutateProbablity: 0.2, // perturb prob random phenotype DNA
   crossoverProbablity: 0.9, // crossover prob
 }
-
-let file = './seed.txt';
-let seed = getData(file);
-seed.shift(); // remove header row
 
 const genetic = new Genetic(config);
 let GENERATION = 10;
@@ -28,35 +30,43 @@ console.log("Start genetic algorithm...");
 async function solve () {
   await genetic.seed(seed);
   const maxResponseTimes = [];
+  const mean = [];
+  const errorEntities = [];
 
   for (let i = 0; i < GENERATION; i++) {
     await genetic.estimate();
-    console.log(`Generation ${i + 1} completed`);
+
+    console.log(`Generation ${i + 1}: `);
     const best = await genetic.best()[0];
     console.log("best: ", best);
+
     maxResponseTimes.push(best.fitness);
-    // console.log(population);
+    mean.push(Math.round(genetic.stats.mean * 100) / 100);
+    
+    if(best.state.error === true) {
+      errorEntities.push(best);
+    }
+
     if (i === GENERATION - 1) {
       console.log("Best result: ", best);
     } else {
       await genetic.breed();
     }
 
+    errorEntities.forEach((entity) => {
+      console.log(entity);
+    });
   }
 
   // write result to file
-  fs.writeFile('./result.txt', JSON.stringify(genetic.population), "utf-8", (err) => {
+  fs.writeFile('./result.json', JSON.stringify(genetic.population), "utf-8", (err) => {
     if (err) throw err;
   });
   
   // plot max response time
-  const data = [{
-    x: Array.from(Array(GENERATION).keys()),
-    y: maxResponseTimes,
-    type: 'scatter'
-  }]
-  
-  plot(data);
+  myPlot(maxResponseTimes, "Max Response Time");
+  // plot mean response time
+  myPlot(mean, "Mean Response Time");
 }
 
 solve();
@@ -133,7 +143,21 @@ async function fitness (entity) {
   };
   const time = await fuzzReq(url, data);
   let fitness = time;
-  return { fitness, state: {} };
+
+  let error = false;
+  let errorCode = '';
+
+  if (time === 0) {
+    error = true;
+    errorCode = 'OTHERS'
+  } 
+
+  if (time === Number.MAX_SAFE_INTEGER) {
+    error = true;
+    errorCode = 'ECONNRESET'
+  }
+
+  return { fitness, state: {error, errorCode} };
 };
 
 function getData(file) {
@@ -144,4 +168,41 @@ function getData(file) {
     data.push(line.split("\t"));
   });
   return data;
+}
+
+function myPlot(input, title) {
+  const data = [{
+    x: Array.from(Array(GENERATION).keys()),
+    y: input,
+    type: 'scatter',
+  }];
+
+  const layout = {
+    title: title,
+    xaxis: {
+      title: 'Generation'
+    },
+    yaxis: {
+      title: 'Fitness'
+    },
+    title,
+    annotations: [],
+  };
+
+  const annotations = [];
+  for (let i = 0; i < data[0].x.length; i++) {
+    annotations.push({
+      x: data[0].x[i],
+      y: data[0].y[i],
+      text: `${data[0].y[i]}`,
+      showarrow: true,
+      arrowhead: 7,
+      ax: 0,
+      ay: -40
+    })
+  }
+
+  layout.annotations = annotations;
+
+  plot(data, layout);
 }

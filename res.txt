@@ -1,211 +1,212 @@
 Start genetic algorithm...
-Generation 1 completed
+Generation 1: 
 best:  {
-  fitness: 31854,
+  fitness: 9007199254740991,
   entity: [
-    '線性代數', '林牛', '5',
-    'RZ',       '7',    '0',
-    '0',        '1',    '0',
-    '1',        '1',    '1',
-    '1',        '1',    '0',
-    '1',        '1',    '1',
-    '0',        '0',    '1'
+    '生理學', '林牛', '4',
+    'C1',     '1',    '0',
+    '1',      '1',    '1',
+    '1',      '1',    '0',
+    '0',      '0',    '0',
+    '1',      '1',    '0',
+    '1',      '1',    '1'
   ],
   state: {}
 }
-Generation 2 completed
+Generation 2: 
 best:  {
-  fitness: 4175,
+  fitness: 4117,
   entity: [
-    '生理學', '蕭仁傑', 5,
-    'NQ',     6,        1,
-    1,        0,        0,
-    1,        1,        0,
-    1,        0,        0,
-    1,        0,        1,
-    1,        1,        1
+    '線性代數', '劉厚均', 6,
+    'NN',       4,        1,
+    0,          0,        0,
+    0,          0,        1,
+    1,          0,        1,
+    1,          1,        1,
+    1,          0,        0
   ],
   state: {}
 }
-Generation 3 completed
+Generation 3: 
 best:  {
-  fitness: 5200,
+  fitness: 4929,
   entity: [
-    '普通化學（二）', '林牛',
-    '3',              'H5',
-    '6',              '1',
-    '1',              '0',
-    '1',              '0',
-    '0',              '0',
-    '0',              '0',
-    '1',              '1',
-    '1',              '1',
-    '1',              '0',
+    '統計學（二）', '彭淑玲',
+    7,              'VT',
+    4,              1,
+    0,              0,
+    1,              0,
+    1,              1,
+    0,              1,
+    1,              0,
+    1,              0,
+    1,              0,
+    1
+  ],
+  state: {}
+}
+Generation 4: 
+best:  {
+  fitness: 4181,
+  entity: [
+    '基礎學術英文', '楊毅',
+    '1',            'E4',
+    '6',            '1',
+    '0',            '1',
+    '1',            '1',
+    '1',            '1',
+    '0',            '0',
+    '0',            '0',
+    '0',            '0',
+    '0',            '0',
     '0'
   ],
   state: {}
 }
-Generation 4 completed
+Generation 5: 
 best:  {
-  fitness: 5000,
+  fitness: 4218,
+  entity: [
+    '桌球與健康體能', '林士鳴',
+    '6',              'VV',
+    '3',              '1',
+    '0',              '0',
+    '0',              '1',
+    '0',              '0',
+    '0',              '0',
+    '1',              '1',
+    '1',              '0',
+    '0',              '1',
+    '0'
+  ],
+  state: {}
+}
+Generation 6: 
+best:  {
+  fitness: 5041,
+  entity: [
+    '線性代數', '蕭仁傑', 3,
+    'L5',       3,        0,
+    1,          1,        1,
+    0,          1,        0,
+    0,          0,        1,
+    1,          0,        1,
+    0,          0,        1
+  ],
+  state: {}
+}
+Generation 7: 
+best:  {
+  fitness: 4160,
+  entity: [
+    '基礎學術英文', '蕭仁傑',
+    7,              'AH',
+    6,              0,
+    1,              0,
+    1,              1,
+    1,              0,
+    0,              0,
+    0,              1,
+    1,              1,
+    0,              1,
+    0
+  ],
+  state: {}
+}
+Generation 8: 
+best:  {
+  fitness: 7207,
+  entity: [
+    '生理學', '劉厚均', 3,
+    'VN',     2,        1,
+    1,        1,        1,
+    1,        0,        0,
+    0,        1,        0,
+    0,        0,        1,
+    1,        0,        0
+  ],
+  state: {}
+}
+Generation 9: 
+best:  {
+  fitness: 4025,
   entity: [
     '外國語言（二）', '趙子元',
-    '5',              'U1',
-    '7',              '0',
-    '0',              '1',
-    '1',              '0',
-    '1',              '0',
+    '7',              'A7',
+    '3',              '1',
+    '0',              '0',
     '1',              '1',
+    '0',              '0',
     '1',              '0',
     '0',              '0',
     '0',              '1',
-    '0'
-  ],
-  state: {}
-}
-Generation 5 completed
-best:  {
-  fitness: 4724,
-  entity: [
-    '線性代數', '林士鳴', 2,
-    'S6',       2,        0,
-    1,          0,        1,
-    0,          1,        1,
-    0,          0,        0,
-    0,          1,        1,
-    0,          1,        0
-  ],
-  state: {}
-}
-Generation 6 completed
-best:  {
-  fitness: 5215,
-  entity: [
-    '線性代數', '林士鳴', 2,
-    'P9',       2,        0,
-    1,          0,        1,
-    1,          1,        0,
-    0,          0,        1,
-    1,          1,        1,
-    1,          1,        0
-  ],
-  state: {}
-}
-Generation 7 completed
-best:  {
-  fitness: 4010,
-  entity: [
-    '大學國文（二）',
-    '楊毅',
-    4,
-    'P4',
-    6,
-    0,
-    0,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    1,
-    1,
-    0,
-    1,
-    1,
-    0,
-    0
-  ],
-  state: {}
-}
-Generation 8 completed
-best:  {
-  fitness: 4396,
-  entity: [
-    '政治哲學概論', '楊毅',
-    '2',            'P6',
-    '1',            '1',
-    '0',            '1',
-    '0',            '0',
-    '0',            '1',
-    '0',            '1',
-    '0',            '0',
-    '0',            '0',
-    '0',            '0',
+    '0',              '1',
     '1'
   ],
   state: {}
 }
-Generation 9 completed
+Generation 10: 
 best:  {
-  fitness: 4013,
+  fitness: 4106,
   entity: [
-    '大學國文（二）',
-    '楊毅',
-    1,
-    'A3',
+    '桌球與健康體能',
+    '陳旻宏',
+    2,
+    'P2',
     4,
     1,
+    0,
+    1,
+    0,
     1,
     1,
     1,
     0,
-    1,
-    0,
     0,
     1,
     0,
-    0,
-    0,
-    1,
     1,
     0,
-    0
-  ],
-  state: {}
-}
-Generation 10 completed
-best:  {
-  fitness: 5040,
-  entity: [
-    '政治哲學概論', '彭淑玲',
-    '7',            'K5',
-    '4',            '1',
-    '1',            '1',
-    '1',            '0',
-    '1',            '0',
-    '1',            '1',
-    '0',            '1',
-    '1',            '1',
-    '1',            '0',
-    '1'
+    1,
+    0,
+    1
   ],
   state: {}
 }
 Best result:  {
-  fitness: 5040,
+  fitness: 4106,
   entity: [
-    '政治哲學概論', '彭淑玲',
-    '7',            'K5',
-    '4',            '1',
-    '1',            '1',
-    '1',            '0',
-    '1',            '0',
-    '1',            '1',
-    '0',            '1',
-    '1',            '1',
-    '1',            '0',
-    '1'
+    '桌球與健康體能',
+    '陳旻宏',
+    2,
+    'P2',
+    4,
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1
   ],
   state: {}
 }
-[32m[Nest] 27508  - [39m2023/05/14 下午2:04:44 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
-[32m[Nest] 27508  - [39m2023/05/14 下午2:04:44 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mServerModule dependencies initialized[39m[38;5;3m +20ms[39m
-[32m[Nest] 27508  - [39m2023/05/14 下午2:04:44 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mServeStaticModule dependencies initialized[39m[38;5;3m +0ms[39m
-[32m[Nest] 27508  - [39m2023/05/14 下午2:04:44 [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mPlotsGateway subscribed to the "readplots" message[39m[38;5;3m +67ms[39m
-[32m[Nest] 27508  - [39m2023/05/14 下午2:04:44 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +4ms[39m
-[Nodeplotlib] Server running at http://localhost:1506
+[Nodeplotlib] App is already up and running
+[32m[Nest] 30912  - [39m2023/05/20 下午8:49:39 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 30912  - [39m2023/05/20 下午8:49:39 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mServerModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 30912  - [39m2023/05/20 下午8:49:39 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mServeStaticModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 30912  - [39m2023/05/20 下午8:49:39 [32m    LOG[39m [38;5;3m[WebSocketsController] [39m[32mPlotsGateway subscribed to the "readplots" message[39m[38;5;3m +59ms[39m
+[32m[Nest] 30912  - [39m2023/05/20 下午8:49:39 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +6ms[39m
+[Nodeplotlib] Server running at http://localhost:6120
 [Nodeplotlib] client connected
 [Nodeplotlib] client disconnected
 [Nodeplotlib] Server shutting down

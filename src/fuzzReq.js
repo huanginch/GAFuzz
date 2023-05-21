@@ -33,6 +33,9 @@ async function fuzzReq(url, data) {
   }
   catch (err) {
     // console.log("error occur", err);
+    if(err.code === 'ECONNRESET') {
+      return Number.MAX_SAFE_INTEGER;
+    }
     return 0;
   }
 }
