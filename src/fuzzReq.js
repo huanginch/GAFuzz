@@ -1,23 +1,21 @@
-const axios = require('axios');
-
 async function fuzzReq(url, data) {
   const axios = require('axios');
+  const rateLimit = require('axios-rate-limit');
   try {
     let resTime = 0;
-    axios.interceptors.request.use(x => {
+    const http = rateLimit(axios.create(), { maxRequests: 1, perMilliseconds: 10000 });
+    http.interceptors.request.use(x => {
       // to avoid overwriting if another interceptor
       // already defined the same object (meta)
       x.meta = x.meta || {};
       x.meta.requestStartedAt = new Date().getTime();
-      // console.log(x.meta.requestStartedAt);
       return x;
     })
 
-    axios.interceptors.response.use(x => {
+    http.interceptors.response.use(x => {
       resTime = new Date().getTime() - x.config.meta.requestStartedAt;
-      // console.log(new Date().getTime())
-      // console.log('----');
-      // console.log(resTime)
+      // console.log(x.config.meta.requestStartedAt);
+      // console.log(resTime);
       return x;
     },
       // Handle 4xx & 5xx responses
@@ -26,17 +24,14 @@ async function fuzzReq(url, data) {
         throw x;
       }
     )
-    axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
-    const res = await axios.post(url, data);
-    // console.log(res.data);  
-    return resTime;
+    http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+    const res = await http.post(url, data);
+    const statusCode = res.status;
+    return { resTime, statusCode };
   }
   catch (err) {
-    // console.log("error occur", err);
-    if(err.code === 'ECONNRESET') {
-      return Number.MAX_SAFE_INTEGER;
-    }
-    return 0;
+    const statusCode = err.code;
+    return { resTime: 0, statusCode };
   }
 }
 
