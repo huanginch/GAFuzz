@@ -2,7 +2,8 @@
   "name": "gafuzz",
   "version": "1.0.0",
   "description": "using ga to fuzz web and test its performance",
-  "main": "index.js",
+  "exports": "./index.js",
+  "type": "module",
   "scripts": {
     "project": "node index.js",
     "test": "mocha test"

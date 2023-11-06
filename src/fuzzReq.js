@@ -1,6 +1,7 @@
+import axios from 'axios';
+import rateLimit from 'axios-rate-limit';
+
 async function fuzzReq(url, data) {
-  const axios = require('axios');
-  const rateLimit = require('axios-rate-limit');
   try {
     let resTime = 0;
     const http = rateLimit(axios.create(), { maxRequests: 1, perMilliseconds: 10000 });
@@ -35,4 +36,4 @@ async function fuzzReq(url, data) {
   }
 }
 
-module.exports = fuzzReq;
+export default fuzzReq;
