@@ -1,7 +1,6 @@
 import fuzzReq from './src/fuzzReq.js';
 import target from './fuzztarget.json' assert { type: "json" };
 import { appendFileSync } from 'fs';
-import target from './fuzztarget.json' assert { type: "json" };
 
 const populationCSV = './res/Population.csv';
 
