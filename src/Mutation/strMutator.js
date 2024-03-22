@@ -1,3 +1,6 @@
+/**
+ * Insert one character in string with 50% probability
+ */
 function insertStr(str) {
   let newstr = "";
   let index = Math.floor(Math.random() * str.length);
@@ -5,6 +8,9 @@ function insertStr(str) {
   return newstr;
 }
 
+/**
+ * Delete one character in string with 50% probability
+ */
 function deleteStr(str) {
   if (str === "") {
     return str;
@@ -15,6 +21,9 @@ function deleteStr(str) {
   return newstr;
 }
 
+/**
+ * Flip one character in string with 50% probability
+ */
 function filpStr(str) {
   let newstr = "";
   let index = Math.floor(Math.random() * str.length);
@@ -22,6 +31,9 @@ function filpStr(str) {
   return newstr;
 }
 
+/**
+ * Swap each two adjacent characters in string with 50% probability
+ */
 function swapStr(str) {
   let newstr = "";
   for (let i = 0; i < str.length; i++) {
@@ -40,6 +52,48 @@ function swapStr(str) {
   return newstr;
 }
 
+/**
+ * Duplicate each character in string with 50% probability
+ */
+function duplicateStr(str) {
+  let newstr = "";
+  for (let i = 0; i < str.length; i++) {
+    if (Math.random() < 0.5) {
+      newstr += str[i];
+      newstr += str[i];
+      i++; // skip the next character
+    } else {
+      newstr += str[i];
+    }
+  }
+  return newstr;
+}
+
+// function copyStr(str) {
+//   return str + str;
+// }
+
+/**
+ * Insert % in the string, % is the wildcard character in SQL
+ */
+function insertPercent(str) {
+  let newstr = "";
+  newstr = "%" + str + "%";
+  return newstr;
+}
+
+/**
+ * Insert _ in the string, _ is the wildcard character in SQL
+ */
+function insertUnderline(str) {
+  let newstr = "";
+  newstr = str + "_";
+  return newstr;
+}
+
+/**
+ * Random generate a Chinese UTF-8 character
+ */
 function randomUTF8() {
   // random generate a Chinese UTF-8 character
   const start = 0x4E00;
@@ -50,10 +104,13 @@ function randomUTF8() {
 }
 
 const strMutator = [
-  insertStr,
-  deleteStr,
   filpStr,
+  deleteStr,
+  insertStr,
   swapStr,
+  duplicateStr,
+  insertPercent,
+  insertUnderline,
 ]
 
 export default strMutator;
