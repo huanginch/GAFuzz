@@ -1,11 +1,21 @@
-import { appendFileSync } from 'fs';
 import Select from '../Selection/index.js'
+import TS from '../MBA-TS/index.js';
+import strMutator from '../Mutation/strMutator.js';
 
+/**
+ * Genetic algorithm with Thompson Sampling for mutation
+ */
 class Genetic {
     constructor(options) {
         this.stats = {};
+        this.prevPop = [];
         this.population = [];
         this.options = { ...this.getDefaultOptions(), ...options };
+        this.numMutations = strMutator.length;
+        this.ts = new TS(); //use thompson sampling to select mutation method
+        this.ts.initialize(this.numMutations);
+        this.selectedArmRecorder = [];
+        this.mutatedIndex = []; //record mutated index
     }
 
     getDefaultOptions() {
@@ -31,7 +41,9 @@ class Genetic {
             selected = await crossoverFunction(selected[0], selected[1]);
         }
         for (let i = 0; i < selected.length; i++) {
-            selected[i] = await this.tryMutate(selected[i]);
+            const selectedArm = this.ts.selectArm(); //select mutation method
+            this.selectedArmRecorder.push(selectedArm);
+            selected[i] = await this.tryMutate(selected[i], selectedArm);
         }
         return selected;
     };
@@ -39,11 +51,12 @@ class Genetic {
     /**
      * Try mutate entity with optional probabilty
      */
-    tryMutate = async (entity) => {
+    tryMutate = async (entity, selectedArm) => {
         // applies mutation based on mutation probability
         if (this.options.mutationFunction && Math.random() <= this.options.mutateProbablity) {
-            return this.options.mutationFunction(entity);
+            return this.options.mutationFunction(selectedArm, entity);
         }
+
         return entity;
     };
 
@@ -53,7 +66,7 @@ class Genetic {
     async seed(entities = []) {
         this.population = entities.map((entity) => ({ fitness: null, entity, state: {} }));
         // seed the population
-        await this.fill(this.population);
+        // await this.fill(this.population);
     }
     best(count = 1) {
         return this.population.slice(0, count);
@@ -64,6 +77,7 @@ class Genetic {
     async breed() {
         // crossover and mutate
         let newPop = [];
+
         // lets the best solution fall through
         if (this.options.fittestNSurvives) {
             const cutted = this.cutPopulation(this.options.fittestNSurvives);
@@ -71,7 +85,6 @@ class Genetic {
             for (const item of cutted) {
                 const tempItem = JSON.parse(JSON.stringify(item));
                 newPop.push({ ...tempItem });
-                // newPop.push({ ...item });
             }
         }
         // Lenght may be change dynamically, because fittest and some pairs from crossover
@@ -79,11 +92,26 @@ class Genetic {
             const crossed = await this.tryCrossover();
             newPop.push(...crossed.map((entity) => ({ fitness: null, entity, state: {} })));
         }
+
+        // remove extra entities
+        if (newPop.length > this.options.populationSize) {
+            newPop.pop();
+        }
+
+        //update mutation index
+        this.mutatedIndex = newPop.map((individual, index) => {
+            // 對每個個體的 entity 的最後一個元素檢查是否為字串型別
+            return typeof individual.entity[individual.entity.length - 1] === 'string' ? index : undefined;
+        }).filter(index => index !== undefined); // 過濾出不為 undefined 的索引
+        // console.log('mutatedIndex', this.mutatedIndex);
+
+        // deduplicate population
         if (this.options.deduplicate) {
             newPop = newPop.filter((ph) => this.options.deduplicate(ph.entity));
         }
         await this.fill(newPop);
         // console.log('newPop', newPop);
+        this.prevPop = JSON.parse(JSON.stringify(this.population));
         this.population = newPop;
     }
     /**
@@ -92,32 +120,51 @@ class Genetic {
     async estimate() {
         const { fitnessFunction } = this.options;
         // reset for each generation
-        this.internalGenState = {};
         let i = 0;
         for await (const target of this.population) {
-            if (i > this.options.fittestNSurvives - 1 || this.population.length > 2000) {
-                const { fitness, state } = await fitnessFunction(target.entity);
-                target.fitness = fitness;
-                target.state = state;
+            if(i <= this.options.fittestNSurvives - 1 && target.fitness !== null) {
+                //the fittestNSurvives are already estimated
+                // if it is the fittestNSurvives, then skip
+                i++;
+                continue;
             }
 
+            // estimate fitness
+            const { fitness, state } = await fitnessFunction(target.entity);
+            target.fitness = fitness;
+            target.state = state;
             i++;
         }
-    }
-    /**
-     * witre non duplicate population to csv
-    */
-    writeToCSV(csvFile, population, i) {
-        appendFileSync(csvFile, `round${i}\n`);
-
-        if (i !== 0) {
-            population = population.slice(this.options.fittestNSurvives - 1, population.length);
-        }
-
-        for (const item of population) {
-            appendFileSync(csvFile, `${item.fitness}, ${item.entity}\n`);
+        // 有做突變的個體才更新 thompson sampling
+        if(this.mutatedIndex.length > 0) {
+            this.updateTS();
         }
     }
+
+    countSuccess() {
+        let numSuccess = [0, 0, 0, 0];
+        let numFailures = [0, 0, 0, 0];
+        this.mutatedIndex.forEach((index) => {
+            //if prevPop's fitness is smaller than current fitness, then success
+            if (this.stats.meanWithoutElite < this.population[index].fitness) {
+                numSuccess[this.selectedArmRecorder[index]]++;
+            } else {
+                numFailures[this.selectedArmRecorder[index]]++;
+            }
+        });
+
+        return { numSuccess, numFailures };
+    }
+
+    updateTS() {
+        const {numSuccess, numFailures} = this.countSuccess();
+        for (let i = 0; i < this.numMutations; i++) {
+            let success = numSuccess[i] > numFailures[i] ? true : false;
+            this.ts.updateArm(i, success);
+        }
+        this.mutatedIndex = [];
+    }
+
     /**
      * Appli population sorting
      */
@@ -136,6 +183,10 @@ class Genetic {
      */
     getMean() {
         return this.population.reduce((a, b) => a + b.fitness, 0) / this.population.length;
+    }
+
+    getMeanWithoutElite() {
+        return this.population.slice(this.options.fittestNSurvives).reduce((a, b) => a + b.fitness, 0) / (this.population.length - this.options.fittestNSurvives);
     }
     /**
      * Standart deviation
