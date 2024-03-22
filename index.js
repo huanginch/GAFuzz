@@ -1,31 +1,35 @@
-import fuzzReq from './src/fuzzReq.js';
-import { writeFile, readFileSync, appendFileSync, openSync, writeFileSync } from 'fs';
+import { writeFile, appendFileSync, openSync, writeFileSync, statSync, closeSync } from 'fs';
+
 import Genetic from './src/genetic/index.js';
 import Select from './src/Selection/index.js'
 import { Crossover } from './src/Crossover/index.js';
 import { Mutation } from './src/Mutation/index.js';
+import { fitness } from './fitness.js';
+
+import { getData } from './utils/getData.js';
+import { writeFitness } from './utils/writeFitness.js';
 
 // setting
-let file = './seed.txt';
+let file = './seeds/pchome-seed.txt';
 let seed = getData(file);
 seed.shift(); // remove header row
 const fittestNSurvives = 10;
 const config = {
-  mutationFunction: Mutation.myMutation,
+  mutationFunction: Mutation,
   crossoverFunction: Crossover.uniform,
   fitnessFunction: fitness,
   fittestNSurvives, // number of fittest survive
   populationSize: 100, // number of population
-  select1: Select.Rank,
+  select1: Select.RouletteWheel,
   select2: Select.RouletteWheel,
-  mutateProbablity: 0.2, // perturb prob random phenotype DNA
-  crossoverProbablity: 0.9, // crossover prob
+  mutateProbablity: 0.9, // perturb prob random phenotype DNA
+  crossoverProbablity: 0.4, // crossover prob
 };
 
 const genetic = new Genetic(config);
-let GENERATION = 50;
+let GENERATION = 70;
 
-const populationCSV = openSync('./res/Population.csv', 'w');
+let populationCSV = openSync('./res/Population.csv', 'w');
 
 // genetic algorithm setting
 console.log("Start genetic algorithm...");
@@ -42,12 +46,14 @@ async function solve() {
 
   for (let i = 0; i < GENERATION; i++) {
     console.log(`Generation ${i} pending... `);
+    populationCSV = openSync('./res/Population.csv', 'a');
     appendFileSync(populationCSV, `Generation ${i}\n`);
+    closeSync(populationCSV);
 
     // estimate fitness three times and take average
     await genetic.estimate();
 
-    writeFitness(fitnessCSV, genetic.population, i);
+    writeFitness(fitnessCSV, genetic.population, i, fittestNSurvives);
 
     // sort population by fitness
     genetic.population.sort((a, b) => {
@@ -56,11 +62,13 @@ async function solve() {
 
     const popLen = genetic.population.length;
     const mean = genetic.getMean();
+    const meanWithoutElite = genetic.getMeanWithoutElite();
     genetic.stats = {
       population: genetic.population.length,
       maximum: genetic.population[0].fitness,
       minimum: genetic.population[popLen - 1].fitness,
       mean,
+      meanWithoutElite,
       stdev: genetic.getStdev(mean),
     };
 
@@ -111,72 +119,3 @@ async function solve() {
 }
 
 solve();
-
-// fitness function
-async function fitness(entity) {
-  // console.log(entity);
-  const url = "https://140.116.165.105/~cos/ccdemo/sel/index.php?c=qry11215&m=save_qry";
-  let cl = [];
-  for (let i = 0; i < 16; i++) {
-    if (entity[5 + i] === "1") {
-      cl.push(i + 1);
-    }
-  }
-  cl = cl.toString();
-  const data = {
-    "id": "1",
-    "cosname": entity[0],
-    "teaname": entity[1],
-    "wk": entity[2],
-    "dept_no": entity[3],
-    "degree": entity[4],
-    "cl": cl,
-  };
-
-  let resTimeArr = [];
-  let statusCode = 0;
-  let error = true;
-
-  for (let i = 0; i < 10; i++) {
-    const { resTime, statusCode: code } = await fuzzReq(url, data);
-    resTimeArr.push(resTime);
-    statusCode = code;
-    if (statusCode.toString().charAt(0) === "2") {
-      error = false;
-    }
-  }
-  const mid = resTimeArr.length / 2;
-  let resTimeArrSorted = JSON.parse(JSON.stringify(resTimeArr));
-  resTimeArrSorted.sort((a, b) => { return b - a; });
-  let fitness = (resTimeArrSorted[mid] + resTimeArrSorted[mid - 1]) / 2;
-  console.log(resTimeArr);
-
-  // write result to file
-  resTimeArr.forEach((resTime) => {
-    appendFileSync(populationCSV, `${resTime},`);
-  });
-  appendFileSync(populationCSV, `${fitness},${entity},${statusCode}\n`);
-
-  // console.log(`fitness: ${fitness}, error: ${error}, statusCode: ${statusCode}`);
-  return { fitness, state: { error, statusCode } };
-}
-
-// utility functions
-function getData(file) {
-  let data = [];
-  const allContents = readFileSync(file, 'utf8');
-
-  allContents.split("\r\n").forEach((line) => {
-    data.push(line.split("\t"));
-  });
-  return data;
-}
-
-function writeFitness(csvFile, data, i) {
-  if (i !== 0) {
-    data = data.slice(fittestNSurvives, data.length);
-  }
-  data.forEach((line) => {
-    appendFileSync(csvFile, `${line.fitness}\n`, 'utf8');
-  });
-}

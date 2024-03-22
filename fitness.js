@@ -23,14 +23,13 @@ async function fitness(entity) {
       i--;
       continue;
     }
+  } 
     resTimeArr.push(res.resTime);
     statusCode = res.statusCode;
-  }
 
   // fitness is the median of response time
   let median = resTimeArr.sort((a, b) => a - b)[Math.floor(resTimeArr.length / 2)];
   let fitness = median;
-
   let mutateFunc = entity[target.paramNum] === undefined ? "none" : entity[target.paramNum];
   if (mutateFunc === "none") { //remove mutate function in entity
     entity[target.paramNum] = "none";
