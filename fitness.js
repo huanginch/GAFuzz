@@ -1,7 +1,6 @@
 import fuzzReq from './src/fuzzReq.js';
 import target from './fuzztarget.json' assert { type: "json" };
 import { appendFileSync } from 'fs';
-import { delay } from 'rxjs';
 
 const populationCSV = './res/Population.csv';
 
@@ -23,10 +22,10 @@ async function fitness(entity) {
       i--;
       continue;
     }
-  } 
     resTimeArr.push(res.resTime);
     statusCode = res.statusCode;
-
+  } 
+  
   // fitness is the median of response time
   let median = resTimeArr.sort((a, b) => a - b)[Math.floor(resTimeArr.length / 2)];
   let fitness = median;
