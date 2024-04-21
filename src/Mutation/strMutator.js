@@ -77,24 +77,6 @@ function copyStr(str) {
 }
 
 /**
- * Insert % in the string, % is the wildcard character in SQL
- */
-function insertPercent(str) {
-  let newstr = "";
-  newstr = "%" + str + "%";
-  return newstr;
-}
-
-/**
- * Insert _ in the string, _ is the wildcard character in SQL
- */
-function insertUnderline(str) {
-  let newstr = "";
-  newstr = str + "_";
-  return newstr;
-}
-
-/**
  * Random generate a Chinese UTF-8 character
  */
 function randomUTF8() {
@@ -113,8 +95,6 @@ const strMutator = [
   swapStr,
   duplicateStr,
   copyStr,
-  insertPercent,
-  insertUnderline,
 ]
 
 export default strMutator;

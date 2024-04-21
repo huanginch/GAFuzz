@@ -1,20 +1,18 @@
 import fuzzReq from './src/fuzzReq.js';
 import target from './fuzztarget.json' assert { type: "json" };
 import { appendFileSync } from 'fs';
-import target from '../../fuzztarget.json' assert { type: "json" };
 
 const populationCSV = './res/Population.csv';
 
 async function fitness(entity) {
-  // console.log(entity);
 
   const url = target.url;
-  const data = handleBookwakerParas(entity);
+  const data = handleCSIEParas(entity);
 
   let resTimeArr = [];
   let error = true;
   let statusCode = "";
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 1; i++) {
     const res = await fuzzReq(url, data);
     if (res.statusCode.toString().charAt(0) === '2') {
       error = false;
@@ -30,6 +28,7 @@ async function fitness(entity) {
 
   // fitness is the median of the response times
   let fitness = resTimeArr.sort((a, b) => a - b)[Math.floor(resTimeArr.length / 2)];
+  console.log(resTimeArr);
 
   let mutateFunc = entity[target.paramNum] === undefined ? "none" : entity[target.paramNum];
   if (mutateFunc === "none") {
@@ -78,30 +77,9 @@ const handleCSIEParas = (entity) => {
     "cl": cl,
   };
 
-  return data;
-}
+  let postData = new URLSearchParams(Object.entries(data)).toString();
 
-const handleBookwakerParas = (entity) => {
-  let data = {};
-  entity.forEach((gene, index) => {
-    if (index === 0) {
-      data["w"] = gene;
-    } else if (index === 1) {
-      data["m"] = gene;
-    } else if (index === 2 && gene !== "") {
-      data["vertical"] = gene;
-    } else if (index === 3 && gene !== "") {
-      data["restriced"] = gene;
-    } else if (index === 4 && gene !== "") {
-      data["page"] = gene;
-    } else if (index === 5 && gene !== "") {
-      data["order"] = gene;
-    } else if (index === 6 && gene !== "") {
-      data["detail"] = gene;
-    }
-  });
-
-  return data;
+  return postData;
 }
 
 export { fitness };

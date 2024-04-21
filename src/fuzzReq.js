@@ -2,7 +2,12 @@ import got from 'got';
 
 const fuzzReq = async (url, data) => {
   try {
-    const response = await got.get(url, { searchParams: data });
+    const response = await got.post(url, { 
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }, 
+      body: data
+    });
     const resTime = response.timings.phases.firstByte;
     const statusCode = response.statusCode;
     return { resTime, statusCode };
