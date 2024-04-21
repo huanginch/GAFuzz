@@ -5,7 +5,7 @@ function writeFitness(csvFile, data, i, fittestNSurvives = 10) {
     data = data.slice(fittestNSurvives, data.length);
   }
   data.forEach((line) => {
-    appendFileSync(csvFile, `${line.fitness}\n`, 'utf8');
+    appendFileSync(csvFile, `${i},${line.fitness}\n`, 'utf8');
   });
 }
 

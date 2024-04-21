@@ -9,8 +9,6 @@ function Mutation(selectedArm, entity) {
     3: 'swap',
     4: 'duplicate',
     5: 'copy',
-    6: 'insertPercent',
-    7: 'insertUnderline'
   }
   // selectedArm = Math.floor(Math.random() * 5); //use MBATS or not
   entity[0] = strMutator[selectedArm](entity[0]); //cosname, mutate string

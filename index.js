@@ -10,19 +10,19 @@ import { getData } from './utils/getData.js';
 import { writeFitness } from './utils/writeFitness.js';
 
 // setting
-let file = './seeds/bw-seed.txt';
+let file = './seeds/rseed.txt';
 let seed = getData(file);
 seed.shift(); // remove header row
-const fittestNSurvives = 20;
+const fittestNSurvives = 5;
 const config = {
   mutationFunction: Mutation,
   crossoverFunction: Crossover.uniform,
   fitnessFunction: fitness,
   fittestNSurvives, // number of fittest survive
-  populationSize: 50, // number of population
+  populationSize: 30, // number of population
   select1: Select.RouletteWheel,
   select2: Select.RouletteWheel,
-  mutateProbablity: 0.2, // perturb prob random phenotype DNA
+  mutateProbablity: 0.8, // perturb prob random phenotype DNA
   crossoverProbablity: 0.5, // crossover prob
 };
 
@@ -38,11 +38,12 @@ async function solve() {
   await genetic.seed(seed);
   const maxResponseTimes = [];
   const meanResponseTimes = [];
+  const meanWithoutEliteResponseTimes = [];
   const stdev = [];
   const errorEntities = [];
 
   const fitnessCSV = openSync('./res/Fitness.csv', 'w');
-  appendFileSync(fitnessCSV, `Fitness\n`);
+  appendFileSync(fitnessCSV, `Round,Fitness\n`);
 
   for (let i = 0; i < GENERATION; i++) {
     console.log(`Generation ${i} pending... `);
@@ -75,6 +76,7 @@ async function solve() {
     const best = genetic.best();
     maxResponseTimes.push(genetic.stats.maximum);
     meanResponseTimes.push(genetic.stats.mean);
+    meanWithoutEliteResponseTimes.push(genetic.stats.meanWithoutElite);
     stdev.push(genetic.stats.stdev);
 
     genetic.population.forEach((entity) => {
@@ -115,6 +117,13 @@ async function solve() {
   });
   for (let i = 0; i < GENERATION; i++) {
     appendFileSync('./res/MeanResponseTime.csv', `${i + 1},${meanResponseTimes[i].toString()}\n`);
+  }
+
+  writeFileSync('./res/MeanWithoutElite.csv', 'Generation,Fitness\n', (err) => {
+    if (err) throw err;
+  });
+  for (let i = 0; i < GENERATION; i++) {
+    appendFileSync('./res/MeanWithoutElite.csv', `${i + 1},${meanWithoutElite[i].toString()}\n`);
   }
 }
 
